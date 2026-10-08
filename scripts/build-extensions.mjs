@@ -22,7 +22,15 @@ for (const browser of ['chrome', 'firefox']) {
   if (browser === 'chrome') manifest.key = identity.key;
   await writeFile(path.join(output, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
 }
-console.log(`Built Chrome (${identity.chromeId}) and Firefox (${identity.firefoxId}) unpacked extensions in extensions/dist/.`);
+
+const chromeStore = path.join(dist, 'chrome-store');
+await rm(chromeStore, { recursive: true, force: true });
+await cp(path.join(dist, 'chrome'), chromeStore, { recursive: true });
+const chromeStoreManifest = JSON.parse(await readFile(path.join(chromeStore, 'manifest.json'), 'utf8'));
+delete chromeStoreManifest.key;
+await writeFile(path.join(chromeStore, 'manifest.json'), `${JSON.stringify(chromeStoreManifest, null, 2)}\n`);
+
+console.log(`Built keyed Chrome development (${identity.chromeId}), keyless Chrome Web Store, and Firefox (${identity.firefoxId}) extensions in extensions/dist/.`);
 
 const validation = await import('node:child_process').then(({ spawnSync }) => spawnSync(process.execPath, [path.join(root, 'scripts/validate-release.mjs')], { stdio: 'inherit', cwd: root }));
 if (validation.status !== 0) throw new Error(`Extension trust validation failed (${validation.status}).`);

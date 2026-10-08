@@ -38,7 +38,7 @@ Compare the files inside that directory with the files at the root of the
 submitted Firefox ZIP. ZIP container metadata can vary by archiving tool; the
 file names and file contents are the reproducible output.
 
-The build also creates `extensions/dist/chrome` and `extensions/sdk/dist`.
+The build also creates `extensions/dist/chrome`, `extensions/dist/chrome-store`, and `extensions/sdk/dist`.
 Those directories are not part of the submitted Firefox extension.
 
 ## Source layout

@@ -19,8 +19,8 @@ test('pairing belongs to the page, outlives the popup, and deduplicates requests
   assert.strictEqual(listeners[0]({type:'TIMEBRIDGE_CONNECT',name:'Example'}),pairing);
   assert.equal((await pairing).status,'approved');assert.deepEqual(calls,['permissions.status','permissions.request','permissions.poll']);
 });
-test('both extension popup manifests reference files that ship',()=>{
-  for(const browser of ['chrome','firefox']){
+test('extension popup manifests reference files that ship',()=>{
+  for(const browser of ['chrome','chrome-store','firefox']){
     const root=`extensions/dist/${browser}/`,manifest=JSON.parse(readFileSync(root+'manifest.json'));
     const html=readFileSync(root+manifest.action.default_popup,'utf8');
     for(const [,file] of html.matchAll(/(?:src|href)="([^"]+)"/g))assert.ok(existsSync(root+file),`${browser}: missing ${file}`);
@@ -29,13 +29,15 @@ test('both extension popup manifests reference files that ship',()=>{
 test('built extensions preserve reviewed identities and least-privilege boundaries',()=>{
   const identity=JSON.parse(readFileSync('extensions/identity.json','utf8'));
   const chrome=JSON.parse(readFileSync('extensions/dist/chrome/manifest.json','utf8'));
+  const chromeStore=JSON.parse(readFileSync('extensions/dist/chrome-store/manifest.json','utf8'));
   const firefox=JSON.parse(readFileSync('extensions/dist/firefox/manifest.json','utf8'));
   assert.equal(chrome.key,identity.key);
+  assert.equal(chromeStore.key,undefined);
   assert.equal(firefox.browser_specific_settings.gecko.id,identity.firefoxId);
   assert.equal(firefox.browser_specific_settings.gecko.strict_min_version,'140.0');
   assert.equal(firefox.browser_specific_settings.gecko_android,undefined);
   assert.deepEqual(firefox.browser_specific_settings.gecko.data_collection_permissions,{required:['none']});
-  for(const manifest of [chrome,firefox]){
+  for(const manifest of [chrome,chromeStore,firefox]){
     assert.deepEqual([...manifest.permissions].sort(),['activeTab','nativeMessaging','scripting','storage']);
     assert.equal(manifest.incognito,'not_allowed');
     assert.equal(manifest.host_permissions,undefined);

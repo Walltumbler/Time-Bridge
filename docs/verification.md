@@ -4,7 +4,7 @@
 
 - All 25 regular Rust library tests pass; two desktop audio tests remain opt-in. The HTTP integration test covers pairing approval, credentials, creating an icon-bearing alarm, and reading it back with origin isolation.
 - Six JavaScript tests pass, including SDK transport errors, credential reuse, browser extension pairing, and preventing duplicate writes after a timeout. TypeScript/Vite production build, Rust all-target checks, and the native helper test pass.
-- Windows release executable, NSIS installer, and MSI build successfully. Release packaging produces the SDK tarball, Chrome/Firefox development archives, static setup website, both installers, and SHA-256 checksums.
+- Windows release executable, NSIS installer, and MSI build successfully. Release packaging produces the SDK tarball, a keyless Chrome Web Store archive, a Firefox AMO archive, the static setup website, both installers, and SHA-256 checksums.
 - The running desktop serves the bundled setup page and SDK. Store publication, installer signing, a public hosted website, and npm publication are not complete. Installation and a live browser alarm still need end-user testing.
 - Public-source allowlist and staged-content checks exclude unrelated workspace projects, generated files, credentials, and local user data.
 
