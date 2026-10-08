@@ -4,7 +4,9 @@
   "version": "0.2.0",
   "description": "Hand timers to the Timebridge desktop app.",
   "key": "__CHROME_PUBLIC_KEY__",
+  "incognito": "not_allowed",
   "permissions": ["activeTab", "scripting", "nativeMessaging", "storage"],
+  "content_security_policy": { "extension_pages": "script-src 'self'; object-src 'none'" },
   "action": { "default_title": "Connect this site to Timebridge", "default_popup": "popup.html", "default_icon": { "32": "icons/32.png", "128": "icons/128.png" } },
   "icons": { "32": "icons/32.png", "128": "icons/128.png" },
   "background": { "service_worker": "src/background.js" }

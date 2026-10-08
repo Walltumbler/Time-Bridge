@@ -3,27 +3,133 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  actions: read
+  id-token: write
+  attestations: write
 jobs:
   package:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: npm
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable, pinned 2026-10-08
       - run: npm ci
       - run: npm run audit:public
+      - run: npm run release:validate
       - run: npm run extensions:build
       - run: npm run test:sdk
+      - name: Require SignPath Foundation configuration
+        shell: pwsh
+        env:
+          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+          SIGNPATH_ORGANIZATION_ID: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          SIGNPATH_PROJECT_SLUG: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          SIGNPATH_SIGNING_POLICY_SLUG: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          SIGNPATH_ARTIFACT_CONFIGURATION_SLUG: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
+        run: |
+          $missing = @()
+          foreach ($name in 'SIGNPATH_API_TOKEN','SIGNPATH_ORGANIZATION_ID','SIGNPATH_PROJECT_SLUG','SIGNPATH_SIGNING_POLICY_SLUG','SIGNPATH_ARTIFACT_CONFIGURATION_SLUG') {
+            if ([string]::IsNullOrWhiteSpace((Get-Item "env:$name").Value)) { $missing += $name }
+          }
+          if ($missing.Count) { throw "SignPath release signing is required. Missing: $($missing -join ', ')" }
       - run: npm run native:host
       - run: cargo test --locked --manifest-path src-tauri/Cargo.toml --lib
       - run: cargo test --locked --manifest-path native-host/Cargo.toml
-      - run: npm run desktop:build
-      - run: npm run release:package
+      - run: npm run desktop:build:prepared -- --no-bundle --no-sign
+      - name: Stage unsigned application binaries for SignPath
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path signpath-input/binaries -Force | Out-Null
+          Copy-Item src-tauri/target/release/timebridge.exe signpath-input/binaries/timebridge.exe
+          Copy-Item (Get-ChildItem src-tauri/binaries/timebridge-host-*.exe | Select-Object -First 1 -ExpandProperty FullName) signpath-input/binaries/timebridge-host.exe
+      - name: Upload unsigned application binaries for SignPath
+        id: unsigned-binaries
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: timebridge-windows-binaries-unsigned
+          path: signpath-input/binaries/*
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+      - name: Sign application binaries with SignPath Foundation
+        uses: SignPath/github-action-submit-signing-request@c92b958760219087e01f8d67a1669ed57afe2627 # v2
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
+          github-artifact-id: ${{ steps.unsigned-binaries.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: '3600'
+          output-artifact-directory: signpath-output/binaries
+      - name: Restore signed application binaries
+        shell: pwsh
+        run: |
+          Copy-Item signpath-output/binaries/timebridge.exe src-tauri/target/release/timebridge.exe -Force
+          $host = Get-ChildItem src-tauri/binaries/timebridge-host-*.exe | Select-Object -First 1
+          Copy-Item signpath-output/binaries/timebridge-host.exe $host.FullName -Force
+          Copy-Item signpath-output/binaries/timebridge-host.exe src-tauri/target/release/timebridge-host.exe -Force
+          ./scripts/verify-windows-signatures.ps1 -Path src-tauri/target/release/timebridge.exe,src-tauri/binaries
+      - name: Bundle signed binaries into unsigned installers
+        run: node node_modules/@tauri-apps/cli/tauri.js bundle --bundles nsis,msi --no-sign --no-binary-patching --ci
+      - name: Stage unsigned installers for SignPath
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path signpath-input/installers -Force | Out-Null
+          Copy-Item src-tauri/target/release/bundle/nsis/*.exe signpath-input/installers/
+          Copy-Item src-tauri/target/release/bundle/msi/*.msi signpath-input/installers/
+      - name: Upload unsigned installers for SignPath
+        id: unsigned-installers
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: timebridge-windows-installers-unsigned
+          path: signpath-input/installers/*
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+      - name: Sign installers with SignPath Foundation
+        uses: SignPath/github-action-submit-signing-request@c92b958760219087e01f8d67a1669ed57afe2627 # v2
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: ${{ vars.SIGNPATH_ARTIFACT_CONFIGURATION_SLUG }}
+          github-artifact-id: ${{ steps.unsigned-installers.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: '3600'
+          output-artifact-directory: signpath-output/installers
+      - name: Restore signed installers
+        shell: pwsh
+        run: |
+          $nsis = Get-ChildItem signpath-output/installers/*.exe | Select-Object -First 1
+          $msi = Get-ChildItem signpath-output/installers/*.msi | Select-Object -First 1
+          Copy-Item $nsis.FullName src-tauri/target/release/bundle/nsis/$($nsis.Name) -Force
+          Copy-Item $msi.FullName src-tauri/target/release/bundle/msi/$($msi.Name) -Force
+      - name: Verify every Windows signature
+        shell: pwsh
+        run: ./scripts/verify-windows-signatures.ps1 -Path src-tauri/target/release/timebridge.exe,src-tauri/binaries,src-tauri/target/release/bundle
+      - name: Package signed release
+        shell: pwsh
+        env:
+          TIMEBRIDGE_REQUIRE_WINDOWS_SIGNATURES: '1'
+        run: npm run release:package
+      - name: Attest release artifacts
+        uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        with:
+          subject-path: |
+            artifacts/*.exe
+            artifacts/*.msi
+            artifacts/*.zip
+            artifacts/*.tgz
+            artifacts/*.txt
+            artifacts/*.json
       - name: Upload reviewable build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: timebridge-windows-release
           path: |
@@ -32,6 +138,7 @@ jobs:
             artifacts/*.zip
             artifacts/*.tgz
             artifacts/SHA256SUMS.txt
+            artifacts/*.json
       - name: Create or update a draft release
         shell: pwsh
         env:
@@ -47,6 +154,6 @@ jobs:
             $release = gh release view $tag --json isDraft | ConvertFrom-Json
             if (-not $release.isDraft) { throw "A published release already exists. Bump the version instead of replacing public assets." }
           }
-          $assets = Get-ChildItem artifacts -File | Where-Object { $_.Extension -in '.exe','.msi','.zip','.tgz','.txt' } | ForEach-Object FullName
+          $assets = Get-ChildItem artifacts -File | Where-Object { $_.Extension -in '.exe','.msi','.zip','.tgz','.txt','.json' } | ForEach-Object FullName
           gh release upload $tag @assets --clobber
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

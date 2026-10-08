@@ -26,3 +26,21 @@ test('both extension popup manifests reference files that ship',()=>{
     for(const [,file] of html.matchAll(/(?:src|href)="([^"]+)"/g))assert.ok(existsSync(root+file),`${browser}: missing ${file}`);
   }
 });
+test('built extensions preserve reviewed identities and least-privilege boundaries',()=>{
+  const identity=JSON.parse(readFileSync('extensions/identity.json','utf8'));
+  const chrome=JSON.parse(readFileSync('extensions/dist/chrome/manifest.json','utf8'));
+  const firefox=JSON.parse(readFileSync('extensions/dist/firefox/manifest.json','utf8'));
+  assert.equal(chrome.key,identity.key);
+  assert.equal(firefox.browser_specific_settings.gecko.id,identity.firefoxId);
+  assert.equal(firefox.browser_specific_settings.gecko.strict_min_version,'140.0');
+  assert.equal(firefox.browser_specific_settings.gecko_android,undefined);
+  assert.deepEqual(firefox.browser_specific_settings.gecko.data_collection_permissions,{required:['none']});
+  for(const manifest of [chrome,firefox]){
+    assert.deepEqual([...manifest.permissions].sort(),['activeTab','nativeMessaging','scripting','storage']);
+    assert.equal(manifest.incognito,'not_allowed');
+    assert.equal(manifest.host_permissions,undefined);
+    assert.equal(manifest.content_scripts,undefined);
+    assert.equal(manifest.web_accessible_resources,undefined);
+    assert.equal(manifest.content_security_policy.extension_pages,"script-src 'self'; object-src 'none'");
+  }
+});

@@ -3,9 +3,17 @@
   "name": "Timebridge",
   "version": "0.2.0",
   "description": "Hand timers to the Timebridge desktop app.",
+  "incognito": "not_allowed",
   "permissions": ["activeTab", "scripting", "nativeMessaging", "storage"],
+  "content_security_policy": { "extension_pages": "script-src 'self'; object-src 'none'" },
   "action": { "default_title": "Connect this site to Timebridge", "default_popup": "popup.html", "default_icon": { "32": "icons/32.png", "128": "icons/128.png" } },
   "icons": { "32": "icons/32.png", "128": "icons/128.png" },
   "background": { "scripts": ["src/background.js"] },
-  "browser_specific_settings": { "gecko": { "id": "timebridge@timebridge.local", "strict_min_version": "128.0" } }
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "timebridge@timebridge.local",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": { "required": ["none"] }
+    }
+  }
 }

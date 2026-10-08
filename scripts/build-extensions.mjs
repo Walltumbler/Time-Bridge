@@ -24,6 +24,9 @@ for (const browser of ['chrome', 'firefox']) {
 }
 console.log(`Built Chrome (${identity.chromeId}) and Firefox (${identity.firefoxId}) unpacked extensions in extensions/dist/.`);
 
+const validation = await import('node:child_process').then(({ spawnSync }) => spawnSync(process.execPath, [path.join(root, 'scripts/validate-release.mjs')], { stdio: 'inherit', cwd: root }));
+if (validation.status !== 0) throw new Error(`Extension trust validation failed (${validation.status}).`);
+
 const sdk = path.join(root, 'extensions/sdk/dist');
 await rm(sdk, { recursive: true, force: true });
 await mkdir(sdk, { recursive: true });

@@ -8,6 +8,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const config=JSON.parse(await readFile(path.join(root,'release.config.json'),'utf8'));
 const artifacts=path.join(root,'artifacts');await mkdir(artifacts,{recursive:true});
 execFileSync(process.execPath,[path.join(root,'scripts/audit-public.mjs')],{stdio:'inherit',cwd:root});
+execFileSync(process.execPath,[path.join(root,'scripts/validate-release.mjs')],{stdio:'inherit',cwd:root});
 execFileSync(process.execPath,[path.join(root,'scripts/build-extensions.mjs')],{stdio:'inherit',cwd:root});
 execFileSync(process.execPath,[path.join(root,'scripts/build-site.mjs')],{stdio:'inherit',cwd:root});
 const npm=process.env.npm_execpath || path.join(root,'.tools/package/bin/npm-cli.js');
@@ -27,6 +28,11 @@ for(const kind of ['nsis','msi']){
   for(const name of await readdir(directory))if(name.includes(config.version)&&/\.(exe|msi)$/.test(name)){await copyFile(path.join(directory,name),path.join(artifacts,name));outputs.push(name);installers++;}
 }
 if(!installers)throw new Error('Build the desktop release before packaging installers.');
+if(process.env.TIMEBRIDGE_REQUIRE_WINDOWS_SIGNATURES==='1')execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.join(root,'scripts/verify-windows-signatures.ps1'),'-Path',path.join(root,'src-tauri/target/release/timebridge.exe'),path.join(root,'src-tauri/binaries'),path.join(root,'src-tauri/target/release/bundle')],{stdio:'inherit',cwd:root});
+const assets=[];for(const name of outputs)assets.push({name,sha256:createHash('sha256').update(await readFile(path.join(artifacts,name))).digest('hex')});
+const manifestName='RELEASE-MANIFEST.json';
+await writeFile(path.join(artifacts,manifestName),JSON.stringify({product:'Timebridge',version:config.version,repository:config.repository,sourceRevision:process.env.GITHUB_SHA||null,signedWindowsRelease:process.env.TIMEBRIDGE_REQUIRE_WINDOWS_SIGNATURES==='1',assets},null,2)+'\n');
+outputs.push(manifestName);
 const sums=[];for(const name of outputs)sums.push(`${createHash('sha256').update(await readFile(path.join(artifacts,name))).digest('hex')}  ${name}`);
 await writeFile(path.join(artifacts,'SHA256SUMS.txt'),sums.join('\n')+'\n');
 console.log(`Prepared ${outputs.length} release assets and SHA256SUMS.txt. Nothing was published.`);

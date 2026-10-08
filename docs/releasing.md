@@ -8,6 +8,7 @@ Use a clean Windows checkout with Node 22+, Rust stable, C++ build tools, and Wi
 
 ```sh
 npm ci
+npm run release:validate
 npm run extensions:build
 npm run test:sdk
 npm run native:host
@@ -17,9 +18,15 @@ npm run desktop:build
 npm run release:package
 ```
 
-`artifacts/` contains the NSIS installer (and MSI when built), Chrome/Firefox ZIPs, SDK tarball, static website ZIP, and SHA256SUMS.txt. The ZIP roots contain their manifest directly. The native helper is bundled beside the executable and registered when Desktop opens. The setup site and SDK modules are compiled into Desktop; no workspace paths are served.
+Stable public Windows releases are fail-closed and use SignPath Foundation. The workflow first builds the application and native-messaging helper, submits both to SignPath, verifies the returned signatures, bundles those signed binaries into NSIS and MSI installers, submits the installers for signing, and verifies every resulting Authenticode signature before packaging. It also creates GitHub build-provenance attestations for the release artifacts. An unsigned local build cannot pass the signed-release workflow. If early testing requires a public unsigned build before SignPath approval, publish it manually under a preview tag, mark the GitHub release as a pre-release, label the Windows assets and release notes as unsigned, and reserve the final version tag for the signed workflow.
+
+Apply through [SignPath Foundation](https://signpath.org/apply.html) using this public repository. After approval, configure its GitHub trusted build system and an artifact configuration that signs `.exe` and `.msi` files in the submitted artifact. Add `SIGNPATH_API_TOKEN` as a repository secret, then add these repository variables exactly as supplied by SignPath: `SIGNPATH_ORGANIZATION_ID`, `SIGNPATH_PROJECT_SLUG`, `SIGNPATH_SIGNING_POLICY_SLUG`, and `SIGNPATH_ARTIFACT_CONFIGURATION_SLUG`. The release fails rather than emitting unsigned artifacts when any value is absent or either signing request fails.
+
+`artifacts/` contains the NSIS installer (and MSI when built), Chrome/Firefox ZIPs, SDK tarball, static website ZIP, `RELEASE-MANIFEST.json`, and `SHA256SUMS.txt`. The manifest binds asset hashes to the product version and source revision; GitHub additionally attests the uploaded files. The ZIP roots contain their browser manifest directly. The native helper is bundled beside the executable and registered when Desktop opens. The setup site and SDK modules are compiled into Desktop; no workspace paths are served.
 
 The **Prepare Windows release** Actions workflow builds and tests on a clean runner, uploads artifacts, and creates a **draft** GitHub release. Inspect and test the draft before publishing it. It refuses to replace a published release. Update versions consistently in package manifests, Tauri config, release config, extension manifests, SDK metadata, and release notes before a new version.
+
+GitHub Actions are pinned to exact revisions, with Dependabot maintaining deliberate update pull requests for Actions, npm, and both Rust workspaces. Review those updates before merging; a green dependency update is not a substitute for reviewing permission or build-chain changes.
 
 ## User-friendly extension distribution
 
@@ -29,11 +36,13 @@ The **Prepare Windows release** Actions workflow builds and tests on a clean run
 4. Confirm the Firefox ID matches `timebridge@timebridge.local` in the manifest and native-host allowlist. Complete any current Firefox data-collection declarations during submission; this project has no off-device collection.
 5. Put the verified store URLs into `release.config.json`, rebuild Desktop and the static site, then publish the signed/listed add-ons. The setup guide switches from “pending” to Add to Chrome/Add to Firefox links.
 
+Use [store-listing.md](store-listing.md) and [extension-privacy.md](extension-privacy.md) as the canonical store declarations. `npm run release:validate` rejects identity drift, added host permissions, automatic content scripts, exposed web resources, remote runtime URLs, dynamic code execution, and inconsistent versions. Chrome consumer packages become installable and signed only through the Chrome Web Store. Firefox packages become installable in release Firefox only after Mozilla signs them through AMO; a locally produced ZIP is a review input, not a signed consumer add-on.
+
 Do not describe unpacked ZIPs as one-click consumer installs. Desktop cannot silently add the extension. The user approves browser installation and then separately approves each originating application in Timebridge.
 
 ## Desktop signing and site hosting
 
-The current Windows installer is unsigned. Configure a signing certificate or a supported signing service using CI secrets when ready; do not commit certificate files or passwords. Validate a clean installation, browser helper registration, upgrade, and uninstall on a test machine before announcing a stable release.
+The checked-in workflow is ready for SignPath Foundation enrollment. A successful public release must report `Valid` for the desktop executable, native helper, NSIS installer, and MSI. Signing improves publisher identity and tamper detection, but a new certificate may still need time to build Microsoft SmartScreen reputation.
 
 `npm run site:build` produces `artifacts/site`. Host those static files together over HTTPS on GitHub Pages or another static host; all paths are relative so a project subpath works. Until hosting is enabled, the same guide works locally inside Desktop. The repository does not claim that a public site has already been deployed.
 

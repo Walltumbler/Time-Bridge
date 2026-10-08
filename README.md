@@ -2,7 +2,7 @@
 
 An open-source desktop home for timers and alarms from any app. Create a countdown in a website, close the page, and let Timebridge keep the time.
 
-**Windows development release · Apache-2.0 · No cloud account**
+**Windows desktop app · Apache-2.0 · No cloud account**
 
 ## Get started
 
@@ -60,12 +60,12 @@ npm run desktop:build
 npm run release:package
 ```
 
-Release artifacts include a Windows installer, unpacked extension ZIPs, an SDK tarball, the static setup/demo website, and SHA-256 checksums. [Release process](docs/releasing.md) · [Contributing](CONTRIBUTING.md).
+Stable release artifacts include SignPath Foundation-signed Windows executables/installers, extension store-submission ZIPs, an SDK tarball, the static setup/demo website, SHA-256 checksums, and GitHub build provenance. An explicitly marked GitHub pre-release may be made available for early testing before signing is approved; its Windows installers are not a trusted final distribution. Consumer browser extensions must be installed through their verified Chrome Web Store or Mozilla Add-ons listing. [Release process](docs/releasing.md) · [Extension privacy](docs/extension-privacy.md) · [Contributing](CONTRIBUTING.md).
 
 ## Limits
 
-Desktop must be running and the computer awake. Closing the main window leaves the tray service running; quitting stops alerts. System notification policies may suppress notifications. Windows builds are unsigned development artifacts. The current enhanced audio controls are Windows-only; macOS release behavior remains unverified. Audio restoration runs on normal alarm stop and normal exit; forced termination cannot perform cleanup.
+Desktop must be running and the computer awake. Closing the main window leaves the tray service running; quitting stops alerts. System notification policies may suppress notifications. Local development builds may be unsigned; the public release workflow requires valid Authenticode signatures. The current enhanced audio controls are Windows-only; macOS release behavior remains unverified. Audio restoration runs on normal alarm stop and normal exit; forced termination cannot perform cleanup.
 
-The user controls volume and output preferences. Websites cannot select a device or override those preferences. Each approved app manages only its own items. Revoking access keeps existing timers under the user's control.
+The user controls volume and output preferences. Websites cannot select a device or override those preferences. Each approved app manages only its own items. Revoking access keeps existing timers under the user's control. Signing identifies the publisher and detects tampering; it does not replace store review or an independent security audit.
 
 [Security](SECURITY.md) · [Architecture](docs/architecture.md) · [Verification](docs/verification.md) · [Apache-2.0 license](LICENSE)

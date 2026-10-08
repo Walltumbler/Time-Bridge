@@ -7,7 +7,7 @@
 3. Open Timebridge. The first-run screen offers a guided connection test. You can also open it from **Settings → Open setup guide & test alarm**.
 4. Keep Desktop running in the tray. Closing its window does not stop timers; choosing Quit does.
 
-The current binaries are unsigned development builds. If the repository has no published release yet, build from source using the README. Do not treat a ZIP containing extension files as a desktop installer.
+Only download release installers whose GitHub release includes checksums and build provenance. Development builds may be unsigned; public releases are expected to carry a valid Authenticode publisher signature. If the repository has no published release yet, build from source using the README. Do not treat a ZIP containing extension files as a desktop installer.
 
 ## Connect a website or application
 
@@ -19,7 +19,7 @@ For a first test, use the bundled guide. Choose Connect, approve **Timebridge De
 
 Direct local connections can work without an extension. If your browser blocks that connection, install the Timebridge extension and open its toolbar popup on the website you want to connect. Only the selected page is activated; new tabs or reloads may require clicking the extension again.
 
-The ordinary release process is **Add to Chrome** from the Chrome Web Store and **Add to Firefox** from Mozilla Add-ons. Store links will appear in the setup guide when published. They are currently pending. Chrome requires Web Store distribution for normal Windows/macOS consumer installation; Firefox release builds require Mozilla-signed add-ons. A desktop installer cannot silently install either extension for the user.
+The ordinary release process is **Add to Chrome** from the Chrome Web Store and **Add to Firefox** from Mozilla Add-ons. Store links will appear in the setup guide when published. They are currently pending. Chrome requires Web Store distribution for normal Windows/macOS consumer installation; Firefox release builds require Mozilla-signed add-ons. The Firefox extension requires Firefox Desktop 140 or newer and is intentionally unavailable for Firefox Android because it depends on a desktop native-messaging host. A desktop installer cannot silently install either extension for the user.
 
 ### Development builds
 
