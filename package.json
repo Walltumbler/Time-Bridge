@@ -1,0 +1,31 @@
+{
+  "name": "timebridge",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "desktop": "tauri dev",
+    "desktop:build": "node scripts/build-native-host.mjs && tauri build",
+    "extensions:build": "node scripts/build-extensions.mjs",
+    "native:host": "node scripts/build-native-host.mjs",
+    "native:host:debug": "node scripts/build-native-host.mjs --debug",
+    "test": "cargo test --manifest-path src-tauri/Cargo.toml --lib && cargo test --manifest-path native-host/Cargo.toml",
+    "test:sdk": "node scripts/build-extensions.mjs && node --test tests/*.test.mjs",
+    "demo": "node scripts/build-extensions.mjs && node scripts/serve-demo.mjs",
+    "site:build": "node scripts/build-extensions.mjs && node scripts/build-site.mjs",
+    "audit:public": "node scripts/audit-public.mjs",
+    "release:package": "node scripts/package-release.mjs"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.0.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0",
+    "prettier": "^3.9.9",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
+  },
+  "license": "Apache-2.0"
+}

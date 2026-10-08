@@ -1,0 +1,10 @@
+import { cp, mkdir } from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const output=path.join(root,'artifacts/site');
+await mkdir(output,{recursive:true});
+for(const name of ['index.html','style.css','app.js'])await cp(path.join(root,'site',name),path.join(output,name));
+await cp(path.join(root,'release.config.json'),path.join(output,'release.config.json'));
+await cp(path.join(root,'extensions/sdk/dist'),path.join(output,'sdk'),{recursive:true});
+console.log('Static setup/demo site prepared in artifacts/site.');

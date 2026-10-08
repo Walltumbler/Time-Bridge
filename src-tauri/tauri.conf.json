@@ -1,0 +1,45 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Timebridge",
+  "version": "0.2.0",
+  "identifier": "app.timebridge.desktop",
+  "build": {
+    "devUrl": "http://localhost:1420",
+    "frontendDist": "../dist",
+    "beforeDevCommand": "node node_modules/vite/bin/vite.js --host 127.0.0.1",
+    "beforeBuildCommand": "node scripts/prepare-desktop.mjs"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Timebridge",
+        "width": 1120,
+        "height": 800,
+        "minWidth": 760,
+        "minHeight": 560
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; connect-src ipc: http://ipc.localhost; style-src 'self' 'unsafe-inline'; img-src 'self' asset: http://asset.localhost data:; script-src 'self'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "externalBin": [
+      "binaries/timebridge-host"
+    ],
+    "shortDescription": "Time that keeps going.",
+    "icon": [
+      "icons/icon.ico",
+      "icons/icon.icns",
+      "icons/icon.png"
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "displayLanguageSelector": false
+      }
+    }
+  }
+}

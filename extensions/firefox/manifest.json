@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Timebridge",
+  "version": "0.2.0",
+  "description": "Hand timers to the Timebridge desktop app.",
+  "permissions": ["activeTab", "scripting", "nativeMessaging", "storage"],
+  "action": { "default_title": "Connect this site to Timebridge", "default_popup": "popup.html", "default_icon": { "32": "icons/32.png", "128": "icons/128.png" } },
+  "icons": { "32": "icons/32.png", "128": "icons/128.png" },
+  "background": { "scripts": ["src/background.js"] },
+  "browser_specific_settings": { "gecko": { "id": "timebridge@timebridge.local", "strict_min_version": "128.0" } }
+}

@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Timebridge",
+  "version": "0.2.0",
+  "description": "Hand timers to the Timebridge desktop app.",
+  "key": "__CHROME_PUBLIC_KEY__",
+  "permissions": ["activeTab", "scripting", "nativeMessaging", "storage"],
+  "action": { "default_title": "Connect this site to Timebridge", "default_popup": "popup.html", "default_icon": { "32": "icons/32.png", "128": "icons/128.png" } },
+  "icons": { "32": "icons/32.png", "128": "icons/128.png" },
+  "background": { "service_worker": "src/background.js" }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "@timebridge/sdk",
+  "version": "0.2.0",
+  "description": "Create persistent local alarms and timers from browser and desktop applications.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "files": ["dist", "README.md", "LICENSE"],
+  "sideEffects": false,
+  "engines": { "node": ">=22" },
+  "license": "Apache-2.0",
+  "repository": { "type": "git", "url": "https://github.com/Walltumbler/Time-Bridge.git", "directory": "extensions/sdk" }
+}

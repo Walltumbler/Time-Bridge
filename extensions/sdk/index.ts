@@ -1,0 +1,22 @@
+import { createTimebridge } from "./client.js";
+export { createTimebridge } from "./client.js";
+export * from "./types.js";
+// Lazy construction makes importing the package safe in Node and SSR.
+let singleton: ReturnType<typeof createTimebridge> | undefined;
+const client = () => singleton ??= createTimebridge();
+export const connect = () => client().connect();
+export const requestPermission = () => client().requestPermission();
+export const createCountdown: ReturnType<typeof createTimebridge>["createCountdown"] = o => client().createCountdown(o);
+export const createRangedCountdown: ReturnType<typeof createTimebridge>["createRangedCountdown"] = o => client().createRangedCountdown(o);
+export const createAlarm: ReturnType<typeof createTimebridge>["createAlarm"] = o => client().createAlarm(o);
+export const createWeeklyAlarm: ReturnType<typeof createTimebridge>["createWeeklyAlarm"] = o => client().createWeeklyAlarm(o);
+export const createDateListAlarm: ReturnType<typeof createTimebridge>["createDateListAlarm"] = o => client().createDateListAlarm(o);
+export const createStopwatch: ReturnType<typeof createTimebridge>["createStopwatch"] = (o = {}) => client().createStopwatch(o);
+export const listItems = () => client().listItems();
+export const getItem: ReturnType<typeof createTimebridge>["getItem"] = id => client().getItem(id);
+export const updateItem: ReturnType<typeof createTimebridge>["updateItem"] = (id, title) => client().updateItem(id, title);
+export const actOnItem: ReturnType<typeof createTimebridge>["actOnItem"] = (id, action) => client().actOnItem(id, action);
+export const listUndeliveredEvents = () => client().listUndeliveredEvents();
+export const acknowledgeEvents: ReturnType<typeof createTimebridge>["acknowledgeEvents"] = ids => client().acknowledgeEvents(ids);
+export const Timebridge = { connect, requestPermission, createCountdown, createRangedCountdown, createAlarm, createWeeklyAlarm, createDateListAlarm, createStopwatch, listItems, getItem, updateItem, actOnItem, listUndeliveredEvents, acknowledgeEvents };
+export { iconFromFile } from "./icons.js";

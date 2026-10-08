@@ -1,0 +1,52 @@
+name: Prepare Windows release
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm ci
+      - run: npm run audit:public
+      - run: npm run extensions:build
+      - run: npm run test:sdk
+      - run: npm run native:host
+      - run: cargo test --locked --manifest-path src-tauri/Cargo.toml --lib
+      - run: cargo test --locked --manifest-path native-host/Cargo.toml
+      - run: npm run desktop:build
+      - run: npm run release:package
+      - name: Upload reviewable build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: timebridge-windows-release
+          path: |
+            artifacts/*.exe
+            artifacts/*.msi
+            artifacts/*.zip
+            artifacts/*.tgz
+            artifacts/SHA256SUMS.txt
+      - name: Create or update a draft release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = (Get-Content release.config.json | ConvertFrom-Json).version
+          $tag = "v$version"
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --target $env:GITHUB_SHA --draft --title "Timebridge $version" --notes-file docs/release-notes.md
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } else {
+            $release = gh release view $tag --json isDraft | ConvertFrom-Json
+            if (-not $release.isDraft) { throw "A published release already exists. Bump the version instead of replacing public assets." }
+          }
+          $assets = Get-ChildItem artifacts -File | Where-Object { $_.Extension -in '.exe','.msi','.zip','.tgz','.txt' } | ForEach-Object FullName
+          gh release upload $tag @assets --clobber
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
