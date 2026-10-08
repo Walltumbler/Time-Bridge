@@ -20,6 +20,7 @@
 !/tests/
 !/examples/
 !/site/
+!/store/
 !/docs/
 node_modules/
 target/

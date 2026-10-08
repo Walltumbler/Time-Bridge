@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:virtualization="http://schemas.microsoft.com/appx/manifest/virtualization/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap virtualization rescap">
+  <Identity
+    Name="__IDENTITY_NAME__"
+    Publisher="__PUBLISHER__"
+    Version="__VERSION__"
+    ProcessorArchitecture="x64" />
+  <Properties>
+    <DisplayName>Timebridge</DisplayName>
+    <PublisherDisplayName>__PUBLISHER_DISPLAY_NAME__</PublisherDisplayName>
+    <Description>Persistent local timers and alarms for websites and applications.</Description>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <virtualization:RegistryWriteVirtualization>
+      <virtualization:ExcludedKeys>
+        <virtualization:ExcludedKey>HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\app.timebridge.bridge</virtualization:ExcludedKey>
+        <virtualization:ExcludedKey>HKEY_CURRENT_USER\Software\Mozilla\NativeMessagingHosts\app.timebridge.bridge</virtualization:ExcludedKey>
+      </virtualization:ExcludedKeys>
+    </virtualization:RegistryWriteVirtualization>
+    <virtualization:FileSystemWriteVirtualization>
+      <virtualization:ExcludedDirectories>
+        <virtualization:ExcludedDirectory>$(KnownFolder:RoamingAppData)\app.timebridge.desktop\browser-bridge</virtualization:ExcludedDirectory>
+      </virtualization:ExcludedDirectories>
+    </virtualization:FileSystemWriteVirtualization>
+  </Properties>
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.22000.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+  <Applications>
+    <Application Id="Timebridge" Executable="timebridge.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Timebridge"
+        Description="Time that keeps going—even after the app closes."
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile ShortName="Timebridge" />
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+    <rescap:Capability Name="unvirtualizedResources" />
+  </Capabilities>
+</Package>

@@ -13,6 +13,7 @@
     "release:validate": "node scripts/validate-release.mjs",
     "native:host": "node scripts/build-native-host.mjs",
     "native:host:debug": "node scripts/build-native-host.mjs --debug",
+    "store:msix": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-msix.ps1",
     "test": "cargo test --manifest-path src-tauri/Cargo.toml --lib && cargo test --manifest-path native-host/Cargo.toml",
     "test:sdk": "node scripts/build-extensions.mjs && node --test tests/*.test.mjs",
     "demo": "node scripts/build-extensions.mjs && node scripts/serve-demo.mjs",
