@@ -30,8 +30,10 @@ for(const kind of ['nsis','msi']){
 if(!installers)throw new Error('Build the desktop release before packaging installers.');
 if(process.env.TIMEBRIDGE_REQUIRE_WINDOWS_SIGNATURES==='1')execFileSync('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',path.join(root,'scripts/verify-windows-signatures.ps1'),'-Path',path.join(root,'src-tauri/target/release/timebridge.exe'),path.join(root,'src-tauri/binaries'),path.join(root,'src-tauri/target/release/bundle')],{stdio:'inherit',cwd:root});
 const assets=[];for(const name of outputs)assets.push({name,sha256:createHash('sha256').update(await readFile(path.join(artifacts,name))).digest('hex')});
+let sourceRevision=process.env.GITHUB_SHA||null;
+if(!sourceRevision){try{sourceRevision=execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim()||null;}catch{}}
 const manifestName='RELEASE-MANIFEST.json';
-await writeFile(path.join(artifacts,manifestName),JSON.stringify({product:'Timebridge',version:config.version,repository:config.repository,sourceRevision:process.env.GITHUB_SHA||null,signedWindowsRelease:process.env.TIMEBRIDGE_REQUIRE_WINDOWS_SIGNATURES==='1',assets},null,2)+'\n');
+await writeFile(path.join(artifacts,manifestName),JSON.stringify({product:'Timebridge',version:config.version,repository:config.repository,sourceRevision,signedWindowsRelease:process.env.TIMEBRIDGE_REQUIRE_WINDOWS_SIGNATURES==='1',assets},null,2)+'\n');
 outputs.push(manifestName);
 const sums=[];for(const name of outputs)sums.push(`${createHash('sha256').update(await readFile(path.join(artifacts,name))).digest('hex')}  ${name}`);
 await writeFile(path.join(artifacts,'SHA256SUMS.txt'),sums.join('\n')+'\n');
