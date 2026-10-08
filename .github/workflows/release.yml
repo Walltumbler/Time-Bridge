@@ -10,8 +10,8 @@ jobs:
   package:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
           cache: npm
@@ -47,7 +47,7 @@ jobs:
           Copy-Item (Get-ChildItem src-tauri/binaries/timebridge-host-*.exe | Select-Object -First 1 -ExpandProperty FullName) signpath-input/binaries/timebridge-host.exe
       - name: Upload unsigned application binaries for SignPath
         id: unsigned-binaries
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: timebridge-windows-binaries-unsigned
           path: signpath-input/binaries/*
@@ -55,7 +55,7 @@ jobs:
           retention-days: 1
           compression-level: 0
       - name: Sign application binaries with SignPath Foundation
-        uses: SignPath/github-action-submit-signing-request@c92b958760219087e01f8d67a1669ed57afe2627 # v2
+        uses: SignPath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
@@ -84,7 +84,7 @@ jobs:
           Copy-Item src-tauri/target/release/bundle/msi/*.msi signpath-input/installers/
       - name: Upload unsigned installers for SignPath
         id: unsigned-installers
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: timebridge-windows-installers-unsigned
           path: signpath-input/installers/*
@@ -92,7 +92,7 @@ jobs:
           retention-days: 1
           compression-level: 0
       - name: Sign installers with SignPath Foundation
-        uses: SignPath/github-action-submit-signing-request@c92b958760219087e01f8d67a1669ed57afe2627 # v2
+        uses: SignPath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
@@ -119,7 +119,7 @@ jobs:
           TIMEBRIDGE_REQUIRE_WINDOWS_SIGNATURES: '1'
         run: npm run release:package
       - name: Attest release artifacts
-        uses: actions/attest-build-provenance@96b4a1ef7235a096b17240c259729fdd70c83d45 # v2
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be # v2
         with:
           subject-path: |
             artifacts/*.exe
@@ -129,7 +129,7 @@ jobs:
             artifacts/*.txt
             artifacts/*.json
       - name: Upload reviewable build artifacts
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: timebridge-windows-release
           path: |
