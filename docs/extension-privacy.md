@@ -1,5 +1,7 @@
 # Browser extension privacy
 
+This extension-specific notice supplements the [Timebridge privacy policy](privacy.md), which covers the Windows desktop application, native helper, and official browser extensions.
+
 The Timebridge browser extension has one purpose: after the user selects its toolbar button, it connects that website tab to the Timebridge desktop app on the same computer.
 
 ## Data handled

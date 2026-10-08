@@ -68,4 +68,4 @@ Desktop must be running and the computer awake. Closing the main window leaves t
 
 The user controls volume and output preferences. Websites cannot select a device or override those preferences. Each approved app manages only its own items. Revoking access keeps existing timers under the user's control. Signing identifies the publisher and detects tampering; it does not replace store review or an independent security audit.
 
-[Security](SECURITY.md) · [Architecture](docs/architecture.md) · [Verification](docs/verification.md) · [Apache-2.0 license](LICENSE)
+[Privacy](docs/privacy.md) · [Security](SECURITY.md) · [Architecture](docs/architecture.md) · [Verification](docs/verification.md) · [Apache-2.0 license](LICENSE)
