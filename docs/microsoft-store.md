@@ -12,7 +12,7 @@ The manifest therefore declares `runFullTrust` and `unvirtualizedResources`, wit
 - `HKCU\Software\Mozilla\NativeMessagingHosts\app.timebridge.bridge`
 - `%APPDATA%\app.timebridge.desktop\browser-bridge`
 
-Timer databases, settings, and all other application data remain virtualized. The precise exclusions make the native host discoverable without broadly disabling package virtualization. Because this manifest syntax requires it, the Store package targets Windows 11 (build 22000) or later.
+Timer databases, settings, and all other application data remain virtualized. The precise exclusions make the native host discoverable without broadly disabling package virtualization. The first Store package intentionally targets Windows 11 (build 22000) or later so this security-sensitive integration can be tested against one modern packaging baseline.
 
 Suggested Partner Center justification:
 
